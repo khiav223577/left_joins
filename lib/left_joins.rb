@@ -1,49 +1,53 @@
 require "left_joins/version"
 require 'active_record'
 
-class ActiveRecord::Relation
-  IS_RAILS3_FLAG = Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new('4.0.0')
-  IS_RAILS5_FLAG = Gem::Version.new(ActiveRecord::VERSION::STRING) >= Gem::Version.new('5.0.0')
-  if not method_defined?(:left_joins)
-    def left_joins(args)
-      6
+module ActiveRecord::QueryMethods
+  if not method_defined?(:left_outer_joins!)
+
+    def left_outer_joins(*args)
+      check_if_method_has_arguments!(:left_outer_joins, args)
+
+      args.compact!
+      args.flatten!
+
+      spawn.left_outer_joins!(*args)
     end
-  end
 
-  alias_method :left_outer_joins, :left_joins if not method_defined?(:left_outer_joins)
-end
+    def left_outer_joins!(*args) # :nodoc:
+      (@left_outer_joins_values ||= []) << args
+      self
+    end
 
-module ActiveRecord
-  module Associations
-    class JoinDependency
-      if not method_defined?(:make_outer_joins)
-        def join_constraints(outer_joins, join_type = nil)
-          @_left_joins_join_type = join_type if join_type
-          result = join_constraints_without_join_type(outer_joins)
-          @_left_joins_join_type = nil
-          return result
-        end
+    alias_method :left_joins, :left_outer_joins
+    alias_method :build_arel_without_outer_joins, :build_arel
+    def build_arel(*args)
+      arel = build_arel_without_outer_joins(*args)
+      build_left_outer_joins(arel, @left_outer_joins_values.flatten) if @left_outer_joins_values
+      return arel
+    end
 
-        private
+    def build_left_outer_joins(manager, joins)
+      @_left_joins_join_type = Arel::Nodes::OuterJoin
+      result = build_joins(manager, joins)
+      @_left_joins_join_type = nil
+      return result
+    end
 
-        def make_inner_joins(parent, child)
-          tables    = table_aliases_for(parent, child)
-          join_type = @_left_joins_join_type || Arel::Nodes::InnerJoin
-          info      = make_constraints parent, child, tables, join_type
+    class ::ActiveRecord::Associations::JoinDependency
+      def make_inner_joins(parent, child)
+        tables    = table_aliases_for(parent, child)
+        join_type = @_left_joins_join_type || Arel::Nodes::InnerJoin
+        info      = make_constraints parent, child, tables, join_type
 
-          [info] + child.children.flat_map { |c| make_inner_joins(child, c) }
-        end
+        [info] + child.children.flat_map { |c| make_inner_joins(child, c) }
       end
     end
   end
 end
 
-class ActiveRecord::Base
-  def self.left_joins(*args, &block)
-    self.where('').left_joins(*args, &block)
-  end
 
-  def self.left_outer_joins(*args, &block)
-    self.where('').left_outer_joins(*args, &block)
+module ActiveRecord
+  module Querying
+    delegate :left_joins, :left_outer_joins, to: :all 
   end
 end
