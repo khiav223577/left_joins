@@ -1,9 +1,9 @@
 require "left_joins/version"
 require 'active_record'
+require 'active_record/relation'
 
 module ActiveRecord::QueryMethods
   if not method_defined?(:left_outer_joins!)
-
     def left_outer_joins(*args)
       check_if_method_has_arguments!(:left_outer_joins, args)
 
@@ -26,20 +26,24 @@ module ActiveRecord::QueryMethods
       return arel
     end
 
+    alias_method :build_joins_without_join_type, :build_joins
+    def build_joins(manager, joins, join_type = Arel::Nodes::InnerJoin)
+      Thread.current.thread_variable_set :left_joins_join_type, join_type
+      result = build_joins_without_join_type(manager, joins)
+      Thread.current.thread_variable_set :left_joins_join_type, nil
+      return result
+    end
+
     def build_left_outer_joins(manager, joins)
-      @_left_joins_join_type = Arel::Nodes::OuterJoin
-      result = build_joins(manager, joins)
-      @_left_joins_join_type = nil
+      result = build_joins(manager, joins, Arel::Nodes::OuterJoin)
       return result
     end
 
     class ::ActiveRecord::Associations::JoinDependency
-      def make_inner_joins(parent, child)
-        tables    = table_aliases_for(parent, child)
-        join_type = @_left_joins_join_type || Arel::Nodes::InnerJoin
-        info      = make_constraints parent, child, tables, join_type
-
-        [info] + child.children.flat_map { |c| make_inner_joins(child, c) }
+      alias_method :make_constraints_without_hooking_join_type, :make_constraints
+      def make_constraints(*args, join_type)
+        join_type = Thread.current.thread_variable_get :left_joins_join_type || join_type
+        return make_constraints_without_hooking_join_type(*args, join_type)
       end
     end
   end
