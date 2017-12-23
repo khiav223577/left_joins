@@ -39,6 +39,10 @@ module ActiveRecord::QueryMethods
       return result
     end
 
+    module ActiveRecord::Querying
+      delegate :left_joins, :left_outer_joins, to: :all 
+    end
+
     class ::ActiveRecord::Associations::JoinDependency
       alias_method :make_constraints_without_hooking_join_type, :make_constraints
       def make_constraints(*args, join_type)
@@ -50,8 +54,3 @@ module ActiveRecord::QueryMethods
 end
 
 
-module ActiveRecord
-  module Querying
-    delegate :left_joins, :left_outer_joins, to: :all 
-  end
-end
