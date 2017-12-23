@@ -22,6 +22,7 @@ users = User.create([
   {:name => 'John1', :email => 'john1@example.com'},
   {:name => 'John2', :email => 'john2@example.com', :serialized_attribute => {:testing => true, :deep => {:deep => :deep}}},
   {:name => 'John3', :email => 'john3@example.com'},
+  {:name => 'John4', :email => 'john4@example.com'},
 ])
 Post.create([
   {:title => "John1's post1", :user_id => users[0].id},
