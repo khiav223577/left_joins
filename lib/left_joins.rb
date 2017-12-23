@@ -13,7 +13,7 @@ module ActiveRecord::QueryMethods
       spawn.left_outer_joins!(*args)
     end
 
-    def left_outer_joins!(*args) # :nodoc:
+    def left_outer_joins!(*args)
       (@left_outer_joins_values ||= []) << args
       self
     end
