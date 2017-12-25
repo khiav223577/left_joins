@@ -3,6 +3,7 @@ require 'active_record'
 require 'active_record/relation'
 
 module ActiveRecord::QueryMethods
+  IS_RAILS3_FLAG = Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new('4.0.0')
   if not method_defined?(:check_if_method_has_arguments!)
     def check_if_method_has_arguments!(method_name, args)
       if args.blank?
@@ -17,7 +18,7 @@ module ActiveRecord::QueryMethods
       args.compact!
       args.flatten!
 
-      spawn.left_outer_joins!(*args)
+      return (IS_RAILS3_FLAG ? clone : spawn).left_outer_joins!(*args)
     end
 
     def left_outer_joins!(*args)
@@ -46,29 +47,25 @@ module ActiveRecord::QueryMethods
       return result
     end
 
-    module ActiveRecord::Querying
-      delegate :left_joins, :left_outer_joins, to: :all 
-    end
-
     class << ::ActiveRecord::Base
-      alias_method :left_outer_joins, :left_joins
       def left_joins(*args)
         self.where('').left_joins(*args)
       end
+      alias_method :left_outer_joins, :left_joins
     end
 
     class ::ActiveRecord::Associations::JoinDependency
-      if method_defined?(:make_constraints) # Rails 4 up
+      if IS_RAILS3_FLAG
+        alias_method :build_without_hooking_join_type, :build
+        def build(associations, parent = nil, join_type = Arel::Nodes::InnerJoin)
+          join_type = Thread.current.thread_variable_get :left_joins_join_type || join_type
+          return build_without_hooking_join_type(associations, parent, join_type)
+        end
+      else
         alias_method :make_constraints_without_hooking_join_type, :make_constraints
         def make_constraints(*args, join_type)
           join_type = Thread.current.thread_variable_get :left_joins_join_type || join_type
           return make_constraints_without_hooking_join_type(*args, join_type)
-        end
-      else # Rails 3
-        alias_method :build_without_hooking_join_type, :build
-        def build(associations, parent = nil, join_type = Arel::InnerJoin)
-          join_type = Thread.current.thread_variable_get :left_joins_join_type || join_type
-          return build_without_hooking_join_type(associations, parent, join_type)
         end
       end
     end
