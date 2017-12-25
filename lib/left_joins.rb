@@ -3,6 +3,13 @@ require 'active_record'
 require 'active_record/relation'
 
 module ActiveRecord::QueryMethods
+  if not method_defined?(:check_if_method_has_arguments!)
+    def check_if_method_has_arguments!(method_name, args)
+      if args.blank?
+        raise ArgumentError, "The method .#{method_name}() must contain arguments."
+      end
+    end
+  end
   if not method_defined?(:left_outer_joins!)
     def left_outer_joins(*args)
       check_if_method_has_arguments!(:left_outer_joins, args)
