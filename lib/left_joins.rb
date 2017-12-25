@@ -50,14 +50,28 @@ module ActiveRecord::QueryMethods
       delegate :left_joins, :left_outer_joins, to: :all 
     end
 
+    class << ::ActiveRecord::Base
+      alias_method :left_outer_joins, :left_joins
+      def left_joins(*args)
+        self.where('').left_joins(*args)
+      end
+    end
+
     class ::ActiveRecord::Associations::JoinDependency
-      alias_method :make_constraints_without_hooking_join_type, :make_constraints
-      def make_constraints(*args, join_type)
-        join_type = Thread.current.thread_variable_get :left_joins_join_type || join_type
-        return make_constraints_without_hooking_join_type(*args, join_type)
+      if method_defined?(:make_constraints) # Rails 4 up
+        alias_method :make_constraints_without_hooking_join_type, :make_constraints
+        def make_constraints(*args, join_type)
+          join_type = Thread.current.thread_variable_get :left_joins_join_type || join_type
+          return make_constraints_without_hooking_join_type(*args, join_type)
+        end
+      else # Rails 3
+        alias_method :build_without_hooking_join_type, :build
+        def build(associations, parent = nil, join_type = Arel::InnerJoin)
+          join_type = Thread.current.thread_variable_get :left_joins_join_type || join_type
+          return build_without_hooking_join_type(associations, parent, join_type)
+        end
       end
     end
   end
 end
-
 
