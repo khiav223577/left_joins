@@ -4,12 +4,10 @@ require 'active_record/relation'
 
 module ActiveRecord::QueryMethods
   IS_RAILS3_FLAG = Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new('4.0.0')
-  class WhereChain
-    if not method_defined?(:check_if_method_has_arguments!)
-      def check_if_method_has_arguments!(method_name, args)
-        if args.blank?
-          raise ArgumentError, "The method .#{method_name}() must contain arguments."
-        end
+  if IS_RAILS3_FLAG
+    def check_if_method_has_arguments!(method_name, args)
+      if args.blank?
+        raise ArgumentError, "The method .#{method_name}() must contain arguments."
       end
     end
   end
@@ -73,12 +71,12 @@ module ActiveRecord::QueryMethods
     end
 
     module ActiveRecord::Calculations
-      def perform_calculation(operation, column_name, _options = {})
+      def perform_calculation(operation, column_name, options = {})
         operation = operation.to_s.downcase
 
         # If #count is used with #distinct (i.e. `relation.distinct.count`) it is
         # considered distinct.
-        distinct = self.distinct_value
+        distinct = IS_RAILS3_FLAG ? options[:distinct] || self.uniq_value : self.distinct_value
 
         if operation == "count"
           column_name ||= select_for_count
