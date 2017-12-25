@@ -4,10 +4,12 @@ require 'active_record/relation'
 
 module ActiveRecord::QueryMethods
   IS_RAILS3_FLAG = Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new('4.0.0')
-  if not method_defined?(:check_if_method_has_arguments!)
-    def check_if_method_has_arguments!(method_name, args)
-      if args.blank?
-        raise ArgumentError, "The method .#{method_name}() must contain arguments."
+  class WhereChain
+    if not method_defined?(:check_if_method_has_arguments!)
+      def check_if_method_has_arguments!(method_name, args)
+        if args.blank?
+          raise ArgumentError, "The method .#{method_name}() must contain arguments."
+        end
       end
     end
   end
