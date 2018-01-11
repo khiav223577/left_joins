@@ -1,9 +1,14 @@
 require "left_joins/version"
 require 'active_record'
 require 'active_record/relation'
+require 'active_record/relation/merger'
 
 module ActiveRecord::QueryMethods
   IS_RAILS3_FLAG = Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new('4.0.0')
+
+  # ----------------------------------------------------------------
+  # ● Implement check_if_method_has_arguments! method for Rails 3
+  # ----------------------------------------------------------------
   if IS_RAILS3_FLAG
     def check_if_method_has_arguments!(method_name, args)
       if args.blank?
@@ -12,6 +17,10 @@ module ActiveRecord::QueryMethods
     end
   end
   if not method_defined?(:left_outer_joins!)
+    # ----------------------------------------------------------------
+    # ● Storing left joins values into @left_outer_joins_values
+    # ----------------------------------------------------------------
+    attr_reader :left_outer_joins_values
     def left_outer_joins(*args)
       check_if_method_has_arguments!(:left_outer_joins, args)
 
@@ -26,6 +35,9 @@ module ActiveRecord::QueryMethods
       self
     end
 
+    # ----------------------------------------------------------------
+    # ● Implement left joins when building arel
+    # ----------------------------------------------------------------
     alias_method :left_joins, :left_outer_joins
     alias_method :build_arel_without_outer_joins, :build_arel
     def build_arel(*args)
@@ -90,6 +102,36 @@ module ActiveRecord::QueryMethods
           execute_simple_calculation(operation, column_name, distinct)
         end
       end
+    end
+  end
+end
+
+# ----------------------------------------------------------------
+# ● Implement left joins when merging relations
+# ----------------------------------------------------------------
+class ActiveRecord::Relation::Merger
+  alias_method :merge_joins_without_left_joins, :merge_joins
+  def merge_joins
+    merge_joins_without_left_joins
+    return if other.left_outer_joins_values.blank?
+    
+    if other.klass == relation.klass
+      relation.left_outer_joins!(*other.left_outer_joins_values)
+    else
+      alias_tracker = nil
+      joins_dependency = other.left_outer_joins_values.map do |join|
+        case join
+        when Hash, Symbol, Array
+          alias_tracker ||= other.alias_tracker
+          ActiveRecord::Associations::JoinDependency.new(
+            other.klass, other.table, join, alias_tracker
+          )
+        else
+          join
+        end
+      end
+
+      relation.left_outer_joins!(*joins_dependency)
     end
   end
 end
