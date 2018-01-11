@@ -109,30 +109,14 @@ end
 # ----------------------------------------------------------------
 # ● Implement left joins when merging relations
 # ----------------------------------------------------------------
-class ActiveRecord::Relation::Merger
-  alias_method :merge_joins_without_left_joins, :merge_joins
-  def merge_joins
-    merge_joins_without_left_joins
-    return if other.left_outer_joins_values.blank?
-    
-    if other.klass == relation.klass
-      relation.left_outer_joins!(*other.left_outer_joins_values)
-    else
-      alias_tracker = nil
-      joins_dependency = other.left_outer_joins_values.map do |join|
-        case join
-        when Hash, Symbol, Array
-          alias_tracker ||= other.alias_tracker
-          ActiveRecord::Associations::JoinDependency.new(
-            other.klass, other.table, join, alias_tracker
-          )
-        else
-          join
-        end
-      end
-
-      relation.left_outer_joins!(*joins_dependency)
-    end
-  end
-end
+# class ActiveRecord::Relation
+#   class Merger
+#     alias_method :merge_without_left_joins, :merge
+#     def merge
+#       values = other.left_outer_joins_values
+#       relation.left_outer_joins!(*values) if values.present?
+#       return merge_without_left_joins
+#     end
+#   end
+# end
 
