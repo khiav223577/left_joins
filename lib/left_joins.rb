@@ -1,15 +1,17 @@
 require "left_joins/version"
 require 'active_record'
 require 'active_record/relation'
-require 'active_record/relation/merger'
+
+module LeftJoins
+  IS_RAILS3_FLAG = Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new('4.0.0')
+end
 
 module ActiveRecord::QueryMethods
-  IS_RAILS3_FLAG = Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new('4.0.0')
 
   # ----------------------------------------------------------------
   # ● Implement check_if_method_has_arguments! method for Rails 3
   # ----------------------------------------------------------------
-  if IS_RAILS3_FLAG
+  if LeftJoins::IS_RAILS3_FLAG
     def check_if_method_has_arguments!(method_name, args)
       if args.blank?
         raise ArgumentError, "The method .#{method_name}() must contain arguments."
@@ -27,7 +29,7 @@ module ActiveRecord::QueryMethods
       args.compact!
       args.flatten!
 
-      return (IS_RAILS3_FLAG ? clone : spawn).left_outer_joins!(*args)
+      return (LeftJoins::IS_RAILS3_FLAG ? clone : spawn).left_outer_joins!(*args)
     end
 
     def left_outer_joins!(*args)
@@ -67,7 +69,7 @@ module ActiveRecord::QueryMethods
     end
 
     class ::ActiveRecord::Associations::JoinDependency
-      if IS_RAILS3_FLAG
+      if LeftJoins::IS_RAILS3_FLAG
         alias_method :build_without_hooking_join_type, :build
         def build(associations, parent = nil, join_type = Arel::Nodes::InnerJoin)
           join_type = Thread.current.thread_variable_get :left_joins_join_type || join_type
@@ -88,7 +90,7 @@ module ActiveRecord::QueryMethods
 
         # If #count is used with #distinct (i.e. `relation.distinct.count`) it is
         # considered distinct.
-        distinct = IS_RAILS3_FLAG ? options[:distinct] || self.uniq_value : self.distinct_value
+        distinct = LeftJoins::IS_RAILS3_FLAG ? options[:distinct] || self.uniq_value : self.distinct_value
 
         if operation == "count"
           column_name ||= select_for_count
@@ -109,27 +111,30 @@ end
 # ----------------------------------------------------------------
 # ● Implement left joins when merging relations
 # ----------------------------------------------------------------
-class ActiveRecord::Relation
-  class Merger
-    alias_method :merge_without_left_joins, :merge
-    def merge
-      values = other.left_outer_joins_values
-      relation.left_outer_joins!(*values) if values.present?
-      return merge_without_left_joins
+if not LeftJoins::IS_RAILS3_FLAG
+  require 'active_record/relation/merger'
+  class ActiveRecord::Relation
+    class Merger
+      alias_method :merge_without_left_joins, :merge
+      def merge
+        values = other.left_outer_joins_values
+        relation.left_outer_joins!(*values) if values.present?
+        return merge_without_left_joins
+      end
+    end
+  end
+
+  module ActiveRecord
+    module SpawnMethods
+
+      private
+
+      alias_method :relation_with_without_left_joins, :relation_with
+      def relation_with(values) # :nodoc:
+        result = relation_with_without_left_joins(values)
+        result.left_outer_joins_values = self.left_outer_joins_values
+        return result
+      end
     end
   end
 end
-module ActiveRecord
-  module SpawnMethods
-
-    private
-
-    alias_method :relation_with_without_left_joins, :relation_with
-    def relation_with(values) # :nodoc:
-      result = relation_with_without_left_joins(values)
-      result.left_outer_joins_values = self.left_outer_joins_values
-      return result
-    end
-  end
-end
-
