@@ -15,21 +15,21 @@ class LeftJoinsTest < Minitest::Test
   end
 
   def test_left_joins_on_has_many_association
-    assert_equal 1, User.find_by(name: 'John1').posts.joins(:post_comments).distinct.size
-    assert_equal 3, User.find_by(name: 'John1').posts.left_joins(:post_comments).distinct.size
+    assert_equal 1, User.where(name: 'John1').first.posts.joins(:post_comments).distinct.size
+    assert_equal 3, User.where(name: 'John1').first.posts.left_joins(:post_comments).distinct.size
   end
 
   def test_left_joins_on_association_condition
     assert_equal [
       ["John1's post3", 'WTF?'],
-      ["John1's post3", '...']
-    ], User.find_by(name: 'John1').posts_with_comments.order('post_comments.id').pluck(:title, :comment)
+      ["John1's post3", '...'],
+    ], User.where(name: 'John1').first.posts_with_comments.order('post_comments.id').pluck(:title, :comment)
 
     assert_equal [
       ["John1's post1", nil],
       ["John1's post2", nil],
       ["John1's post3", 'WTF?'],
-      ["John1's post3", '...']
-    ], User.find_by(name: 'John1').posts_and_comments.order('post_comments.id').pluck(:title, :comment)
+      ["John1's post3", '...'],
+    ], User.where(name: 'John1').first.posts_and_comments.order('post_comments.id').pluck(:title, :comment)
   end
 end
