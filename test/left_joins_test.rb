@@ -18,4 +18,18 @@ class LeftJoinsTest < Minitest::Test
     assert_equal 1, User.find_by(name: 'John1').posts.joins(:post_comments).distinct.size
     assert_equal 3, User.find_by(name: 'John1').posts.left_joins(:post_comments).distinct.size
   end
+
+  def test_left_joins_on_association_condition
+    assert_equal [
+      ["John1's post3", 'WTF?'],
+      ["John1's post3", '...']
+    ], User.find_by(name: 'John1').posts_with_comments.pluck(:title, :comment)
+
+    assert_equal [
+      ["John1's post1", nil],
+      ["John1's post2", nil],
+      ["John1's post3", 'WTF?'],
+      ["John1's post3", '...']
+    ], User.find_by(name: 'John1').posts_and_comments.pluck(:title, :comment)
+  end
 end
