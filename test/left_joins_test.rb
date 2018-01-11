@@ -23,13 +23,13 @@ class LeftJoinsTest < Minitest::Test
     assert_equal [
       ["John1's post3", 'WTF?'],
       ["John1's post3", '...']
-    ], User.find_by(name: 'John1').posts_with_comments.pluck(:title, :comment)
+    ], User.find_by(name: 'John1').posts_with_comments.order('post_comments.id').pluck(:title, :comment)
 
     assert_equal [
       ["John1's post1", nil],
       ["John1's post2", nil],
       ["John1's post3", 'WTF?'],
       ["John1's post3", '...']
-    ], User.find_by(name: 'John1').posts_and_comments.pluck(:title, :comment)
+    ], User.find_by(name: 'John1').posts_and_comments.order('post_comments.id').pluck(:title, :comment)
   end
 end
