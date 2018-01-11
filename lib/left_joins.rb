@@ -20,7 +20,7 @@ module ActiveRecord::QueryMethods
     # ----------------------------------------------------------------
     # ● Storing left joins values into @left_outer_joins_values
     # ----------------------------------------------------------------
-    attr_reader :left_outer_joins_values
+    attr_accessor :left_outer_joins_values
     def left_outer_joins(*args)
       check_if_method_has_arguments!(:left_outer_joins, args)
 
@@ -109,14 +109,27 @@ end
 # ----------------------------------------------------------------
 # ● Implement left joins when merging relations
 # ----------------------------------------------------------------
-# class ActiveRecord::Relation
-#   class Merger
-#     alias_method :merge_without_left_joins, :merge
-#     def merge
-#       values = other.left_outer_joins_values
-#       relation.left_outer_joins!(*values) if values.present?
-#       return merge_without_left_joins
-#     end
-#   end
-# end
+class ActiveRecord::Relation
+  class Merger
+    alias_method :merge_without_left_joins, :merge
+    def merge
+      values = other.left_outer_joins_values
+      relation.left_outer_joins!(*values) if values.present?
+      return merge_without_left_joins
+    end
+  end
+end
+module ActiveRecord
+  module SpawnMethods
+
+    private
+
+    alias_method :relation_with_without_left_joins, :relation_with
+    def relation_with(values) # :nodoc:
+      result = relation_with_without_left_joins(values)
+      result.left_outer_joins_values = self.left_outer_joins_values
+      return result
+    end
+  end
+end
 
