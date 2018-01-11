@@ -1,3 +1,5 @@
+require 'pluck_all'
+
 ActiveRecord::Schema.define do
   self.verbose = false
 
