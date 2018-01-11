@@ -15,8 +15,17 @@ class LeftJoinsTest < Minitest::Test
   end
 
   def test_left_joins_on_has_many_association
-    assert_equal 1, User.where(name: 'John1').first.posts.joins(:post_comments).distinct.count
-    assert_equal 3, User.where(name: 'John1').first.posts.left_joins(:post_comments).distinct.count
+    assert_equal [
+      "John1's post3", 
+      "John1's post3",
+    ], User.where(name: 'John1').first.posts.joins(:post_comments).pluck(:title)
+
+    assert_equal [
+      "John1's post1", 
+      "John1's post2", 
+      "John1's post3",
+      "John1's post3",
+    ], User.where(name: 'John1').first.posts.left_joins(:post_comments).pluck(:title)
   end
 
   def test_left_joins_on_association_condition
