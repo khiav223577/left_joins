@@ -14,7 +14,7 @@ gemfile:
   - gemfiles/5.0.gemfile
 addons:
     code_climate:
-        repo_token: 4be4fd5792acf886a179e8ebff97d155dc19858816d7179f2bf5002bae874818
+        repo_token: 9f3ed69eaf4cd5087f34c19d2e74f2457cdd1ae031cc43d0c1be308675e95823
 after_success:
   - bundle exec codeclimate-test-reporter
 
