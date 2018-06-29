@@ -10,8 +10,11 @@ before_install:
   - gem --version
 gemfile:
   - gemfiles/3.2.gemfile
+  - gemfiles/4.0.gemfile
   - gemfiles/4.2.gemfile
   - gemfiles/5.0.gemfile
+  - gemfiles/5.1.gemfile
+  - gemfiles/5.2.gemfile
 addons:
     code_climate:
         repo_token: 9f3ed69eaf4cd5087f34c19d2e74f2457cdd1ae031cc43d0c1be308675e95823
