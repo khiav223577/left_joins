@@ -59,17 +59,17 @@ module ActiveRecord::QueryMethods
     end
 
     class ::ActiveRecord::Associations::JoinDependency
-      if LeftJoins::IS_RAILS3_FLAG
-        alias_method :build_without_hooking_join_type, :build
-        def build(associations, parent = nil, join_type = Arel::Nodes::InnerJoin)
-          join_type = Thread.current.thread_variable_get :left_joins_join_type || join_type
-          return build_without_hooking_join_type(associations, parent, join_type)
-        end
-      else
+      if private_method_defined?(:make_constraints)
         alias_method :make_constraints_without_hooking_join_type, :make_constraints
         def make_constraints(*args, join_type)
           join_type = Thread.current.thread_variable_get :left_joins_join_type || join_type
           return make_constraints_without_hooking_join_type(*args, join_type)
+        end
+      else
+        alias_method :build_without_hooking_join_type, :build
+        def build(associations, parent = nil, join_type = Arel::Nodes::InnerJoin)
+          join_type = Thread.current.thread_variable_get :left_joins_join_type || join_type
+          return build_without_hooking_join_type(associations, parent, join_type)
         end
       end
     end
