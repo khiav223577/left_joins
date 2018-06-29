@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 # Specify your gem's dependencies in rails_or.gemspec
 
-gem "activerecord", "~> 4.0.0"
+gem "activerecord", "~> 3.2"
 
 group :test do
   gem "simplecov"
