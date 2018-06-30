@@ -4,20 +4,10 @@ require 'active_record/relation'
 
 module LeftJoins
   IS_RAILS3_FLAG = Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new('4.0.0')
+  require 'left_joins_for_rails_3' if IS_RAILS3_FLAG
 end
 
 module ActiveRecord::QueryMethods
-
-  # ----------------------------------------------------------------
-  # ● Implement check_if_method_has_arguments! method for Rails 3
-  # ----------------------------------------------------------------
-  if LeftJoins::IS_RAILS3_FLAG
-    def check_if_method_has_arguments!(method_name, args)
-      if args.blank?
-        raise ArgumentError, "The method .#{method_name}() must contain arguments."
-      end
-    end
-  end
   if not method_defined?(:left_outer_joins!)
     # ----------------------------------------------------------------
     # ● Storing left joins values into @left_outer_joins_values
@@ -69,17 +59,17 @@ module ActiveRecord::QueryMethods
     end
 
     class ::ActiveRecord::Associations::JoinDependency
-      if LeftJoins::IS_RAILS3_FLAG
-        alias_method :build_without_hooking_join_type, :build
-        def build(associations, parent = nil, join_type = Arel::Nodes::InnerJoin)
-          join_type = Thread.current.thread_variable_get :left_joins_join_type || join_type
-          return build_without_hooking_join_type(associations, parent, join_type)
-        end
-      else
+      if private_method_defined?(:make_constraints)
         alias_method :make_constraints_without_hooking_join_type, :make_constraints
         def make_constraints(*args, join_type)
           join_type = Thread.current.thread_variable_get :left_joins_join_type || join_type
           return make_constraints_without_hooking_join_type(*args, join_type)
+        end
+      else
+        alias_method :build_without_hooking_join_type, :build
+        def build(associations, parent = nil, join_type = Arel::Nodes::InnerJoin)
+          join_type = Thread.current.thread_variable_get :left_joins_join_type || join_type
+          return build_without_hooking_join_type(associations, parent, join_type)
         end
       end
     end
@@ -90,7 +80,7 @@ module ActiveRecord::QueryMethods
 
         # If #count is used with #distinct (i.e. `relation.distinct.count`) it is
         # considered distinct.
-        distinct = LeftJoins::IS_RAILS3_FLAG ? options[:distinct] || self.uniq_value : self.distinct_value
+        distinct = options[:distinct] || self.distinct_value
 
         if operation == "count"
           column_name ||= select_for_count

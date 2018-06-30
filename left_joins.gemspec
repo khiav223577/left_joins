@@ -30,8 +30,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler", "~> 1.11"
   spec.add_development_dependency "rake", "~> 12.0"
   spec.add_development_dependency "sqlite3", "~> 1.3"
-  spec.add_development_dependency "minitest", "~> 5.0"
-  spec.add_development_dependency "pluck_all", ">= 1.2.3"
+  spec.add_development_dependency "minitest", ">= 4.2"
+  spec.add_development_dependency "pluck_all", ">= 2.0.2"
 
   spec.add_dependency "activerecord", ">= 3"
 
