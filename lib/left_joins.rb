@@ -68,7 +68,7 @@ module ActiveRecord::QueryMethods
         end
       else
         alias_method :build_without_hooking_join_type, :build
-        def build(associations, parent = nil, join_type = nil)
+        def build(associations, parent = nil, join_type = Arel::Nodes::InnerJoin)
           join_type = Thread.current.thread_variable_get(:left_joins_join_type) || join_type
           return build_without_hooking_join_type(associations, parent, join_type)
         end
