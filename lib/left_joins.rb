@@ -18,6 +18,7 @@ module ActiveRecord::QueryMethods
 
       args.compact!
       args.flatten!
+      self.distinct_value = false
 
       return (LeftJoins::IS_RAILS3_FLAG ? clone : spawn).left_outer_joins!(*args)
     end
@@ -75,15 +76,23 @@ module ActiveRecord::QueryMethods
     end
 
     module ActiveRecord::Calculations
+      # This method is copied from activerecord-4.2.10/lib/active_record/relation/calculations.rb
+      # and modified this line `distinct = true` to  `distinct = true if distinct == nil`
       def perform_calculation(operation, column_name, options = {})
+        # TODO: Remove options argument as soon we remove support to
+        # activerecord-deprecated_finders.
         operation = operation.to_s.downcase
 
-        # If #count is used with #distinct (i.e. `relation.distinct.count`) it is
-        # considered distinct.
+        # If #count is used with #distinct / #uniq it is considered distinct. (eg. relation.distinct.count)
         distinct = options[:distinct] || self.distinct_value
 
         if operation == "count"
           column_name ||= select_for_count
+
+          unless arel.ast.grep(Arel::Nodes::OuterJoin).empty?
+            distinct = true if distinct == nil
+          end
+
           column_name = primary_key if column_name == :all && distinct
           distinct = nil if column_name =~ /\s*DISTINCT[\s(]+/i
         end
