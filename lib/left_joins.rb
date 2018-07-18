@@ -77,7 +77,7 @@ module ActiveRecord::QueryMethods
 
     module ActiveRecord::Calculations
       # This method is copied from activerecord-4.2.10/lib/active_record/relation/calculations.rb
-      # and modified this line `distinct = true` to  `distinct = true if distinct == nil`
+      # and modified this line `distinct = true` to `distinct = true if distinct == nil`
       def perform_calculation(operation, column_name, options = {})
         # TODO: Remove options argument as soon we remove support to
         # activerecord-deprecated_finders.
