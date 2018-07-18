@@ -1,5 +1,8 @@
 ## Change Log
 
+### [v1.0.4](https://github.com/khiav223577/left_joins/compare/v1.0.3...v1.0.4) 2018/07/18
+- [#7](https://github.com/khiav223577/left_joins/pull/7) Fix: eager_load is broken (@khiav223577)
+
 ### [v1.0.3](https://github.com/khiav223577/left_joins/compare/v1.0.2...v1.0.3) 2018/06/30
 - [#5](https://github.com/khiav223577/left_joins/pull/5) Fix: JoinDependency#make_constraints is not defined in Rails 4.0 (@khiav223577)
 
