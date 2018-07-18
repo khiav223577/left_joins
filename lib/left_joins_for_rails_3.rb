@@ -13,4 +13,8 @@ module ActiveRecord::Calculations
   def distinct_value
     uniq_value
   end
+
+  def distinct_value=(v)
+    self.uniq_value = v
+  end
 end
