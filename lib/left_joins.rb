@@ -18,6 +18,7 @@ module ActiveRecord::QueryMethods
 
       args.compact!
       args.flatten!
+      self.distinct_value = false
 
       return (LeftJoins::IS_RAILS3_FLAG ? clone : spawn).left_outer_joins!(*args)
     end
@@ -39,10 +40,10 @@ module ActiveRecord::QueryMethods
     end
 
     alias_method :build_joins_without_join_type, :build_joins
-    def build_joins(manager, joins, join_type = Arel::Nodes::InnerJoin)
-      Thread.current.thread_variable_set :left_joins_join_type, join_type
+    def build_joins(manager, joins, join_type = nil)
+      Thread.current.thread_variable_set(:left_joins_join_type, join_type)
       result = build_joins_without_join_type(manager, joins)
-      Thread.current.thread_variable_set :left_joins_join_type, nil
+      Thread.current.thread_variable_set(:left_joins_join_type, nil)
       return result
     end
 
@@ -62,28 +63,36 @@ module ActiveRecord::QueryMethods
       if private_method_defined?(:make_constraints)
         alias_method :make_constraints_without_hooking_join_type, :make_constraints
         def make_constraints(*args, join_type)
-          join_type = Thread.current.thread_variable_get :left_joins_join_type || join_type
+          join_type = Thread.current.thread_variable_get(:left_joins_join_type) || join_type
           return make_constraints_without_hooking_join_type(*args, join_type)
         end
       else
         alias_method :build_without_hooking_join_type, :build
         def build(associations, parent = nil, join_type = Arel::Nodes::InnerJoin)
-          join_type = Thread.current.thread_variable_get :left_joins_join_type || join_type
+          join_type = Thread.current.thread_variable_get(:left_joins_join_type) || join_type
           return build_without_hooking_join_type(associations, parent, join_type)
         end
       end
     end
 
     module ActiveRecord::Calculations
+      # This method is copied from activerecord-4.2.10/lib/active_record/relation/calculations.rb
+      # and modified this line `distinct = true` to `distinct = true if distinct == nil`
       def perform_calculation(operation, column_name, options = {})
+        # TODO: Remove options argument as soon we remove support to
+        # activerecord-deprecated_finders.
         operation = operation.to_s.downcase
 
-        # If #count is used with #distinct (i.e. `relation.distinct.count`) it is
-        # considered distinct.
+        # If #count is used with #distinct / #uniq it is considered distinct. (eg. relation.distinct.count)
         distinct = options[:distinct] || self.distinct_value
 
         if operation == "count"
-          column_name ||= select_for_count
+          column_name ||= (select_for_count || :all)
+
+          unless arel.ast.grep(Arel::Nodes::OuterJoin).empty?
+            distinct = true if distinct == nil
+          end
+
           column_name = primary_key if column_name == :all && distinct
           distinct = nil if column_name =~ /\s*DISTINCT[\s(]+/i
         end

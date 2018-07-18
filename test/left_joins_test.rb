@@ -41,4 +41,9 @@ class LeftJoinsTest < Minitest::Test
       ["John1's post3", '...'],
     ], User.where(name: 'John1').first.posts_and_comments.order('post_comments.id').pluck_array(:title, :comment)
   end
+
+  def test_eager_load
+    assert_equal 4, User.eager_load(:posts).to_a.size
+    assert_equal 4, User.eager_load(:posts).count
+  end
 end
