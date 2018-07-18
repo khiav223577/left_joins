@@ -17,4 +17,9 @@ module ActiveRecord::Calculations
   def distinct_value=(v)
     self.uniq_value = v
   end
+
+  alias_method :select_for_count_without_default_value, :select_for_count
+  def select_for_count
+    select_for_count_without_default_value || :all
+  end
 end
