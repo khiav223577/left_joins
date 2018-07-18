@@ -40,9 +40,9 @@ module ActiveRecord::QueryMethods
 
     alias_method :build_joins_without_join_type, :build_joins
     def build_joins(manager, joins, join_type = Arel::Nodes::InnerJoin)
-      Thread.current.thread_variable_set :left_joins_join_type, join_type
+      Thread.current.thread_variable_set(:left_joins_join_type, join_type)
       result = build_joins_without_join_type(manager, joins)
-      Thread.current.thread_variable_set :left_joins_join_type, nil
+      Thread.current.thread_variable_set(:left_joins_join_type, nil)
       return result
     end
 
@@ -62,13 +62,13 @@ module ActiveRecord::QueryMethods
       if private_method_defined?(:make_constraints)
         alias_method :make_constraints_without_hooking_join_type, :make_constraints
         def make_constraints(*args, join_type)
-          join_type = Thread.current.thread_variable_get :left_joins_join_type || join_type
+          join_type = Thread.current.thread_variable_get(:left_joins_join_type) || join_type
           return make_constraints_without_hooking_join_type(*args, join_type)
         end
       else
         alias_method :build_without_hooking_join_type, :build
         def build(associations, parent = nil, join_type = Arel::Nodes::InnerJoin)
-          join_type = Thread.current.thread_variable_get :left_joins_join_type || join_type
+          join_type = Thread.current.thread_variable_get(:left_joins_join_type) || join_type
           return build_without_hooking_join_type(associations, parent, join_type)
         end
       end
