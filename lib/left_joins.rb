@@ -12,7 +12,11 @@ module ActiveRecord::QueryMethods
     # ----------------------------------------------------------------
     # ● Storing left joins values into @left_outer_joins_values
     # ----------------------------------------------------------------
-    attr_accessor :left_outer_joins_values
+    attr_writer :left_outer_joins_values
+    def left_outer_joins_values
+      @left_outer_joins_values ||= []
+    end
+
     def left_outer_joins(*args)
       check_if_method_has_arguments!(:left_outer_joins, args)
 
@@ -24,7 +28,7 @@ module ActiveRecord::QueryMethods
     end
 
     def left_outer_joins!(*args)
-      (@left_outer_joins_values ||= []) << args
+      left_outer_joins_values.concat(args)
       self
     end
 
@@ -35,7 +39,7 @@ module ActiveRecord::QueryMethods
     alias_method :build_arel_without_outer_joins, :build_arel
     def build_arel(*args)
       arel = build_arel_without_outer_joins(*args)
-      build_left_outer_joins(arel, @left_outer_joins_values.flatten) if @left_outer_joins_values
+      build_left_outer_joins(arel, @left_outer_joins_values) if @left_outer_joins_values
       return arel
     end
 
