@@ -26,8 +26,12 @@ Gem::Specification.new do |spec|
   spec.bindir        = "exe"
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
-  spec.metadata = {
-    'changelog_uri' => 'https://github.com/khiav223577/left_joins/blob/master/CHANGELOG.md',
+  spec.metadata    = {
+    'homepage_uri'      => "https://github.com/khiav223577/left_joins",
+    'changelog_uri'     => 'https://github.com/khiav223577/left_joins/blob/master/CHANGELOG.md',
+    'source_code_uri'   => 'https://github.com/khiav223577/left_joins/',
+    'documentation_uri' => 'http://www.rubydoc.info/gems/left_joins',
+    'bug_tracker_uri'   => 'https://github.com/khiav223577/left_joins/issues',
   }
 
   spec.add_development_dependency 'bundler', '>= 1.17', '< 3.x'
