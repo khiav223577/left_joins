@@ -49,6 +49,7 @@ class LeftJoinsTest < Minitest::Test
   end
 
   def test_update_with_left_joins
+    skip if Gem::Version.new(ActiveRecord::VERSION::STRING).segments.first(2) == [5, 0] # https://github.com/rails/rails/pull/27193
     assert_equal 3, User.joins(:posts).update_all('id = id')
     assert_equal 4, User.left_joins(:posts).update_all('id = id')
     assert_equal 1, User.left_joins(:posts).where('posts.id IS NULL').update_all('id = id')
