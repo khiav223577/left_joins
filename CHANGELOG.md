@@ -1,5 +1,8 @@
 ## Change Log
 
+### [v1.0.6](https://github.com/khiav223577/left_joins/compare/v1.0.5...v1.0.6) 2019/06/22
+- [#12](https://github.com/khiav223577/left_joins/pull/12) Fix: update with left joins (@khiav223577)
+
 ### [v1.0.5](https://github.com/khiav223577/left_joins/compare/v1.0.4...v1.0.5) 2019/04/11
 - [#9](https://github.com/khiav223577/left_joins/pull/9) left_joins_values should not be nil (@khiav223577)
 - [#10](https://github.com/khiav223577/left_joins/pull/10) Lock sqlite3 version to 1.3 (@khiav223577)
