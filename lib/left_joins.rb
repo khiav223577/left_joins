@@ -6,6 +6,13 @@ module LeftJoins
   IS_RAILS3_FLAG = Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new('4.0.0')
   HAS_BUILT_IN_LEFT_JOINS_METHOD = ActiveRecord::QueryMethods.method_defined?(:left_outer_joins)
   require 'left_joins_for_rails_3' if IS_RAILS3_FLAG
+
+  class << self
+    def bind_values_of(relation)
+      return relation.bound_attributes if relation.respond_to?(:bound_attributes) # For Rails 5.0, 5.1, 5.2
+      return relation.bind_values # For Rails 4.2
+    end
+  end
 end
 
 module ActiveRecord::QueryMethods
@@ -172,7 +179,7 @@ module ActiveRecord
           stmt.wheres = arel.constraints
         end
 
-        bvs = arel.bind_values + bind_values
+        bvs = LeftJoins.bind_values_of(self) + bind_values
         @klass.connection.update stmt, 'SQL', bvs
       end
     end
