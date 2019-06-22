@@ -47,4 +47,10 @@ class LeftJoinsTest < Minitest::Test
     assert_equal 4, User.eager_load(:posts).to_a.size
     assert_equal 4, User.eager_load(:posts).count
   end
+
+  def test_update_with_left_joins
+    assert_equal 3, User.joins(:posts).update_all('id = id')
+    assert_equal 4, User.left_joins(:posts).update_all('id = id')
+    assert_equal 1, User.left_joins(:posts).where('posts.id IS NULL').update_all('id = id')
+  end
 end
