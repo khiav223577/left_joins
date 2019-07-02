@@ -9,11 +9,11 @@ module LeftJoins
 
   class << self
     def patch(target, method, as:)
-      return yield if target.singleton_methods.include?(:any?)
+      return yield if target.singleton_methods.include?(method)
 
       target.define_singleton_method(method, &as)
       result = yield
-      target.singleton_class.send(:remove_method, :any?)
+      target.singleton_class.send(:remove_method, method)
 
       return result
     end
@@ -164,9 +164,13 @@ module ActiveRecord
       alias_method :update_all_without_left_joins_values, :update_all
 
       def update_all(*args)
+        local_joins_values = joins_values.clone
         has_left_outer_joins = left_outer_joins_values.any?
-        LeftJoins.patch(@joins_values, :any?, as: ->{ super() || has_left_outer_joins }) do
-          update_all_without_left_joins_values(*args)
+
+        LeftJoins.patch(self, :joins_values, as: ->{ local_joins_values }) do
+          LeftJoins.patch(local_joins_values, :any?, as: ->{ super() || has_left_outer_joins }) do
+            update_all_without_left_joins_values(*args)
+          end
         end
       end
     end
