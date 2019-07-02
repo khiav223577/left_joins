@@ -180,6 +180,7 @@ module ActiveRecord
         end
 
         bvs = LeftJoins.bind_values_of(self) + bind_values
+        bvs = LeftJoins.bind_values_of(arel) + bind_values
         @klass.connection.update stmt, 'SQL', bvs
       end
     end
