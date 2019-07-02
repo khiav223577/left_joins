@@ -8,9 +8,10 @@ module LeftJoins
   require 'left_joins_for_rails_3' if IS_RAILS3_FLAG
 
   class << self
-    def bind_values_of(relation)
-      return relation.bound_attributes if relation.respond_to?(:bound_attributes) # For Rails 5.0, 5.1, 5.2
-      return relation.bind_values # For Rails 4.2
+    def bind_values_of(arel)
+      return arel.bound_attributes if arel.respond_to?(:bound_attributes) # For Rails 5.0, 5.1, 5.2
+      return arel.bind_values if arel.respond_to?(:bind_values) # For Rails 4.2
+      return [] # For Rails 3.2
     end
   end
 end
