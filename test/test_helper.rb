@@ -7,8 +7,5 @@ require 'left_joins'
 require 'minitest/autorun'
 Minitest::Test = MiniTest::Unit::TestCase unless defined? Minitest::Test
 
-ActiveRecord::Base.establish_connection(
-  "adapter"  => "sqlite3",
-  "database" => ":memory:"
-)
-require 'seeds'
+require 'lib/sqlite3_connection'
+require 'lib/seeds'

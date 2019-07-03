@@ -18,35 +18,21 @@ ActiveRecord::Schema.define do
     t.integer :post_id
     t.string :comment
   end
-end
 
-class User < ActiveRecord::Base
-  serialize :serialized_attribute, Hash
-  has_many :posts
-  if Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new('4.0.0')
-    has_many :posts_with_comments2, class_name: 'Post'
-    has_many :posts_and_comments2 , class_name: 'Post'
-    def posts_with_comments
-      posts_with_comments2.joins(:post_comments)
-    end
+  create_table :organizations, force: true do |t|
+    t.string  :name
+    t.integer :memberships_count, default: 0
+    t.timestamps
+  end
 
-    def posts_and_comments
-      posts_and_comments2.left_joins(:post_comments)
-    end
-  else
-    has_many :posts_with_comments, ->{ joins(:post_comments) }, class_name: 'Post'
-    has_many :posts_and_comments , ->{ left_joins(:post_comments) }, class_name: 'Post'
+  create_table :memberships, force: true do |t|
+    t.string  :name
+    t.references :organization
+    t.timestamps
   end
 end
 
-class Post < ActiveRecord::Base
-  belongs_to :user
-  has_many :post_comments
-end
-
-class PostComment < ActiveRecord::Base
-  belongs_to :post
-end
+ActiveSupport::Dependencies.autoload_paths << File.expand_path('../models/', __FILE__)
 
 users = User.create([
   {:name => 'John1', :email => 'john1@example.com'},

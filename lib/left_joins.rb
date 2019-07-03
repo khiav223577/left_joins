@@ -8,9 +8,14 @@ module LeftJoins
   require 'left_joins_for_rails_3' if IS_RAILS3_FLAG
 
   class << self
-    def bind_values_of(relation)
-      return relation.bound_attributes if relation.respond_to?(:bound_attributes) # For Rails 5.0, 5.1, 5.2
-      return relation.bind_values # For Rails 4.2
+    def patch(target, method, as:)
+      return yield if target.singleton_methods.include?(method)
+
+      target.define_singleton_method(method, &as)
+      result = yield
+      target.singleton_class.send(:remove_method, method)
+
+      return result
     end
   end
 end
@@ -156,31 +161,17 @@ end
 module ActiveRecord
   class Relation
     if not LeftJoins::HAS_BUILT_IN_LEFT_JOINS_METHOD
-      def has_join_values?
-        joins_values.any? || left_outer_joins_values.any?
-      end
-
       alias_method :update_all_without_left_joins_values, :update_all
 
-      def update_all(updates)
-        raise ArgumentError, "Empty list of attributes to change" if updates.blank?
+      def update_all(*args)
+        local_joins_values = joins_values.clone
+        has_left_outer_joins = left_outer_joins_values.any?
 
-        stmt = Arel::UpdateManager.new(arel.engine)
-
-        stmt.set Arel.sql(@klass.send(:sanitize_sql_for_assignment, updates))
-        stmt.table(table)
-        stmt.key = table[primary_key]
-
-        if has_join_values?
-          @klass.connection.join_to_update(stmt, arel)
-        else
-          stmt.take(arel.limit)
-          stmt.order(*arel.orders)
-          stmt.wheres = arel.constraints
+        LeftJoins.patch(self, :joins_values, as: ->{ local_joins_values }) do
+          LeftJoins.patch(local_joins_values, :any?, as: ->{ super() || has_left_outer_joins }) do
+            update_all_without_left_joins_values(*args)
+          end
         end
-
-        bvs = LeftJoins.bind_values_of(self) + bind_values
-        @klass.connection.update stmt, 'SQL', bvs
       end
     end
   end
