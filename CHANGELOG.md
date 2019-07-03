@@ -1,5 +1,8 @@
 ## Change Log
 
+### [v1.0.7](https://github.com/khiav223577/left_joins/compare/v1.0.6...v1.0.7) 2019/07/03
+- [#14](https://github.com/khiav223577/left_joins/pull/14) Fix: AR ~4.2 counter_cache broken in 1.0.6 (@khiav223577)
+
 ### [v1.0.6](https://github.com/khiav223577/left_joins/compare/v1.0.5...v1.0.6) 2019/06/22
 - [#12](https://github.com/khiav223577/left_joins/pull/12) Fix: update with left joins (@khiav223577)
 
