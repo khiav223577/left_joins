@@ -22,13 +22,13 @@ ActiveRecord::Schema.define do
   create_table :organizations, force: true do |t|
     t.string  :name
     t.integer :memberships_count, default: 0
-    t.timestamps
+    t.timestamps null: false
   end
 
   create_table :memberships, force: true do |t|
     t.string  :name
     t.references :organization
-    t.timestamps
+    t.timestamps null: false
   end
 end
 
