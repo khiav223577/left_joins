@@ -15,6 +15,14 @@ class LeftJoinsTest < Minitest::Test
     assert_equal User.left_outer_joins(:posts).count, User.left_joins(:posts).count
   end
 
+  def test_left_joins_with_distinct
+    assert_equal 3, User.joins(:posts).distinct.count
+    assert_equal 3, User.distinct.joins(:posts).count
+
+    assert_equal 4, User.left_joins(:posts).distinct.count
+    assert_equal 4, User.distinct.left_joins(:posts).count
+  end
+
   def test_left_joins_on_has_many_association
     assert_equal [
       "John1's post3",
