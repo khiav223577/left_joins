@@ -1,5 +1,10 @@
 ## Change Log
 
+### [v1.0.8](https://github.com/khiav223577/left_joins/compare/v1.0.7...v1.0.8) 2019/08/12
+- [#17](https://github.com/khiav223577/left_joins/pull/17) Fix: missing distinct_value if using `left_joins` after `distinct` (@khiav223577)
+- [#16](https://github.com/khiav223577/left_joins/pull/16) Fix: `#timestamps` was called without specifying an option for null (@khiav223577)
+- [#15](https://github.com/khiav223577/left_joins/pull/15) Remove deprecated codeclimate-test-reporter gem and update travis config (@khiav223577)
+
 ### [v1.0.7](https://github.com/khiav223577/left_joins/compare/v1.0.6...v1.0.7) 2019/07/03
 - [#14](https://github.com/khiav223577/left_joins/pull/14) Fix: AR ~4.2 counter_cache broken in 1.0.6 (@khiav223577)
 
