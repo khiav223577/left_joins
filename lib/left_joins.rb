@@ -35,7 +35,7 @@ module ActiveRecord::QueryMethods
 
       args.compact!
       args.flatten!
-      self.distinct_value = false
+      self.distinct_value = false if self.distinct_value == nil
 
       return (LeftJoins::IS_RAILS3_FLAG ? clone : spawn).left_outer_joins!(*args)
     end
