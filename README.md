@@ -8,6 +8,10 @@
 
 Backport `left_joins` from Rails 5 for Rails 3 and 4.
 
+## Supports
+- Ruby 2.2 ~ 2.7
+- Rails 3.2, 4.2, 5.0, 5.1, 5.2, 6.0
+
 ## Installation
 
 Add this line to your application's Gemfile:
