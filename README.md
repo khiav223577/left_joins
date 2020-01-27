@@ -30,7 +30,11 @@ Or install it yourself as:
 
 ## Usage
 
-
+Same as what you can do in Rails 5:
+```rb
+User.left_joins(:posts)
+=> SELECT "users".* FROM "users" LEFT OUTER JOIN "posts" ON "posts"."user_id" = "users"."id"
+```
 
 
 ## Development
