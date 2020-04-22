@@ -133,10 +133,37 @@ if not LeftJoins::IS_RAILS3_FLAG
     class Merger
       alias_method :merge_without_left_joins, :merge
       def merge
-        values = other.left_outer_joins_values
-        relation.left_outer_joins!(*values) if values.present?
-        return merge_without_left_joins
+        merge_without_left_joins
+        merge_outer_joins
+        relation
       end
+
+      # code fusion of :
+      # * method merge_outer_joins in activerecord-5.2.0/lib/active_record/relation/merger.rb
+      # * method merge_joins in activerecord-4.2.10/lib/active_record/relation/merger.rb
+      def merge_outer_joins
+        return if other.left_outer_joins_values.blank?
+
+        if other.klass == relation.klass
+          relation.left_outer_joins!(*other.left_outer_joins_values)
+        else
+          joins_dependency, rest = other.left_outer_joins_values.partition do |join|
+            case join
+            when Hash, Symbol, Array
+              true
+            else
+              false
+            end
+          end
+
+          join_dependency = ActiveRecord::Associations::JoinDependency.new(other.klass,
+                                                                           joins_dependency,
+                                                                           [])
+          relation.left_outer_joins!(rest)
+          @relation = relation.left_outer_joins join_dependency
+        end
+      end
+
     end
   end
 
