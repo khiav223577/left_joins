@@ -1,9 +1,9 @@
-require "simplecov"
-SimpleCov.start
+require 'simplecov'
+SimpleCov.start 'test_frameworks'
 
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
-require 'left_joins'
 
+require 'left_joins'
 require 'minitest/autorun'
 Minitest::Test = MiniTest::Unit::TestCase unless defined? Minitest::Test
 
