@@ -1,5 +1,5 @@
 [![Gem Version](https://img.shields.io/gem/v/left_joins.svg?style=flat)](https://rubygems.org/gems/left_joins)
-[![Build Status](https://travis-ci.org/khiav223577/left_joins.svg?branch=master)](https://travis-ci.org/khiav223577/left_joins)
+[![Build Status](https://github.com/khiav223577/left_joins/workflows/Ruby/badge.svg)](https://github.com/khiav223577/left_joins/actions)
 [![RubyGems](http://img.shields.io/gem/dt/left_joins.svg?style=flat)](https://rubygems.org/gems/left_joins)
 [![Code Climate](https://codeclimate.com/github/khiav223577/left_joins/badges/gpa.svg)](https://codeclimate.com/github/khiav223577/left_joins)
 [![Test Coverage](https://codeclimate.com/github/khiav223577/left_joins/badges/coverage.svg)](https://codeclimate.com/github/khiav223577/left_joins/coverage)
