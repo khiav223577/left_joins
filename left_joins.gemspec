@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.name          = "left_joins"
   spec.version       = LeftJoins::VERSION
   spec.authors       = ["khiav reoy"]
-  spec.email         = ["mrtmrt15xn@yahoo.com.tw"]
+  spec.email         = ["khiav223577@gmail.com"]
 
   spec.summary       = %q{Backport `left_joins` from Rails 5 for Rails 3 and 4.}
   spec.description   = %q{Backport `left_joins` from Rails 5 for Rails 3 and 4.}
