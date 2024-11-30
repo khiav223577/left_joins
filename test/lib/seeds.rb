@@ -19,6 +19,13 @@ ActiveRecord::Schema.define do
     t.string :comment
   end
 
+  create_table :post_comment_ratings, :force => true do |t|
+    t.integer :evaluator_id
+    t.integer :post_comment_id
+    t.integer :rated
+    t.boolean :validated
+  end
+
   create_table :organizations, force: true do |t|
     t.string  :name
     t.integer :memberships_count, default: 0
@@ -50,9 +57,17 @@ posts = Post.create([
   {:title => "John3's post1", :user_id => users[2].id},
 ])
 
-PostComment.create([
+post_comments = PostComment.create([
   {:post_id => posts[2].id, :comment => "WTF?"},
   {:post_id => posts[2].id, :comment => "..."},
   {:post_id => posts[3].id, :comment => "cool!"},
   {:post_id => posts[5].id, :comment => "hahahahahahha"},
+])
+
+PostCommentRating.create([
+  {:evaluator_id => users[3].id, :post_comment_id => post_comments[0].id, rated: 10, validated: true},
+  {:evaluator_id => users[2].id, :post_comment_id => post_comments[0].id, rated: 8, validated: true},
+  {:evaluator_id => users[1].id, :post_comment_id => post_comments[0].id, rated: 5, validated: true},
+  {:evaluator_id => users[2].id, :post_comment_id => post_comments[1].id, rated: 4, validated: true},
+  {:evaluator_id => users[3].id, :post_comment_id => post_comments[2].id, rated: 7, validated: true},
 ])
